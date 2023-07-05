@@ -71,7 +71,7 @@ func TestClient_VideoThumbnail(t *testing.T) {
 		}
 	}))
 
-	client, err := youtube.NewClient(httpServer.URL, time.Second)
+	client, err := youtube.NewClient(httpServer.URL, 1*time.Second)
 	if err != nil {
 		t.Fatalf("youtube.NewClient: %v", err)
 	}

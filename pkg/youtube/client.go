@@ -120,6 +120,7 @@ func videoThumbnailURL(baseURL string, videoID string, shortType string) (string
 	return path, nil
 }
 
+// withInternalError wraps an internal error
 func wrapWithInternalError(err error) error {
 	return fmt.Errorf("%w: %w", ErrInternal, err)
 }
