@@ -3,6 +3,7 @@ package youtube
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -32,7 +33,7 @@ var (
 	ErrInvalidBaseURL  = errors.New("invalid base url")
 	ErrInvalidType     = errors.New("invalid thumbnail type")
 	ErrTimeoutExceeded = errors.New("timeout exceeded")
-	ErrInternal        = errors.New("internal error")
+	ErrInternal        = errors.New("youtube client internal error")
 )
 
 // Client for downloading images from YouTube.
@@ -72,14 +73,14 @@ func (c *Client) VideoThumbnail(ctx context.Context, videoID string, typ string)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
-		return nil, ErrInternal
+		return nil, wrapWithInternalError(err)
 	}
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		if os.IsTimeout(err) {
 			return nil, ErrTimeoutExceeded
 		}
-		return nil, ErrInternal
+		return nil, wrapWithInternalError(err)
 	}
 	defer func() {
 		_ = resp.Body.Close()
@@ -87,7 +88,7 @@ func (c *Client) VideoThumbnail(ctx context.Context, videoID string, typ string)
 
 	image, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, ErrInternal
+		return nil, wrapWithInternalError(err)
 	}
 	return image, nil
 }
@@ -114,7 +115,11 @@ func shortVideoThumbnailType(typ string) (string, error) {
 func videoThumbnailURL(baseURL string, videoID string, shortType string) (string, error) {
 	path, err := url.JoinPath(baseURL, video, videoID, shortType+defaultJPG)
 	if err != nil {
-		return "", ErrInternal
+		return "", wrapWithInternalError(err)
 	}
 	return path, nil
+}
+
+func wrapWithInternalError(err error) error {
+	return fmt.Errorf("%w: %w", ErrInternal, err)
 }
