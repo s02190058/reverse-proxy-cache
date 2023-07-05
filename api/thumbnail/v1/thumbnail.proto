@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package thumbnail.v1;
+
+option go_package = "/gen/go/thumbnail/v1;thumbnailpb";
+
+enum ThumbnailType {
+  DEFAULT = 0;
+  MEDIUM = 1;
+  HIGH = 2;
+  STANDARD = 3;
+  MAXRES = 4;
+}
+
+message DownloadThumbnailRequest {
+  string videoID = 1;
+  ThumbnailType type = 2;
+
+}
+
+message DownloadThumbnailResponse {
+  bytes image = 1;
+}
+
+service ThumbnailService {
+  rpc Download(DownloadThumbnailRequest) returns (DownloadThumbnailResponse) {}
+}
