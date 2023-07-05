@@ -1,6 +1,7 @@
 package youtube
 
 import (
+	"context"
 	"errors"
 	"io"
 	"net/http"
@@ -58,7 +59,7 @@ func NewClient(baseURL string, timeout time.Duration) (*Client, error) {
 // VideoThumbnail downloads a video thumbnail of the specified type.
 // Although all video ids consists of exactly 11 symbols of the form -, 0-9, A-Z, _, a-z
 // this is not documented in their API, so we can't validate it.
-func (c *Client) VideoThumbnail(videoID string, typ string) ([]byte, error) {
+func (c *Client) VideoThumbnail(ctx context.Context, videoID string, typ string) ([]byte, error) {
 	shortType, err := shortVideoThumbnailType(typ)
 	if err != nil {
 		return nil, err
@@ -69,7 +70,11 @@ func (c *Client) VideoThumbnail(videoID string, typ string) ([]byte, error) {
 		return nil, err
 	}
 
-	resp, err := c.httpClient.Get(u)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	if err != nil {
+		return nil, ErrInternal
+	}
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		if os.IsTimeout(err) {
 			return nil, ErrTimeoutExceeded

@@ -1,6 +1,7 @@
 package youtube_test
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -138,7 +139,7 @@ func TestClient_VideoThumbnail(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			res, err := client.VideoThumbnail(tc.videoID, tc.typ)
+			res, err := client.VideoThumbnail(context.Background(), tc.videoID, tc.typ)
 			assert.Equal(t, tc.err, err)
 			assert.Equal(t, tc.res, res)
 		})
