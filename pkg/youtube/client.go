@@ -42,7 +42,7 @@ type Client struct {
 	httpClient *http.Client
 }
 
-// NewClient creates a thumbnail management object
+// NewClient creates a thumbnail management object.
 func NewClient(baseURL string, timeout time.Duration) (*Client, error) {
 	if _, err := url.ParseRequestURI(baseURL); err != nil {
 		return nil, ErrInvalidBaseURL
@@ -111,7 +111,7 @@ func shortVideoThumbnailType(typ string) (string, error) {
 	}
 }
 
-// videoThumbnailPath generates a path along which the thumbnail is located
+// videoThumbnailPath generates a path along which the thumbnail is located.
 func videoThumbnailURL(baseURL string, videoID string, shortType string) (string, error) {
 	path, err := url.JoinPath(baseURL, video, videoID, shortType+defaultJPG)
 	if err != nil {
@@ -120,7 +120,7 @@ func videoThumbnailURL(baseURL string, videoID string, shortType string) (string
 	return path, nil
 }
 
-// withInternalError wraps an internal error
+// withInternalError wraps an internal error.
 func wrapWithInternalError(err error) error {
 	return fmt.Errorf("%w: %w", ErrInternal, err)
 }

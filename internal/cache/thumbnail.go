@@ -15,13 +15,13 @@ var (
 	ErrCacheMiss = errors.New("cache miss")
 )
 
-// ThumbnailCache is a redis cache for thumbnails.
+// ThumbnailCache is a Redis cache for thumbnails.
 type ThumbnailCache struct {
 	rdb *redis.Client
 	ttl time.Duration
 }
 
-// NewThumbnailCache creates a redis cache.
+// NewThumbnailCache creates a Redis cache.
 func NewThumbnailCache(rdb *redis.Client, ttl time.Duration) *ThumbnailCache {
 	return &ThumbnailCache{
 		rdb: rdb,

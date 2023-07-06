@@ -13,15 +13,23 @@ var (
 	ErrBadConnection = errors.New("connection cannot be established")
 )
 
-// NewClient creates a client for redis
-func NewClient(host, port string, password string, db int, connectionTimeout time.Duration) (*redis.Client, error) {
+// NewClient creates a client for Redis.
+func NewClient(
+	host, port string,
+	password string,
+	db int,
+	dialTimeout time.Duration,
+	connTimeout time.Duration,
+) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr:     addr(host, port),
-		Password: password,
-		DB:       db,
+		Addr:                  addr(host, port),
+		Password:              password,
+		DB:                    db,
+		DialTimeout:           dialTimeout,
+		ContextTimeoutEnabled: true,
 	})
 
-	ctx, cancel := context.WithTimeout(context.Background(), connectionTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), connTimeout)
 	defer cancel()
 	if err := client.Ping(ctx).Err(); err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrBadConnection, err)
@@ -30,7 +38,7 @@ func NewClient(host, port string, password string, db int, connectionTimeout tim
 	return client, nil
 }
 
-// addr returns a host:port redis address
+// addr returns a host:port Redis address.
 func addr(host, port string) string {
 	return host + ":" + port
 }
