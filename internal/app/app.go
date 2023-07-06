@@ -59,7 +59,7 @@ func Run(cfg *config.Config) {
 
 	thumbnailService := service.NewThumbnailService(thumbnailCache, youtubeClient)
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(l)
 
 	v1.RegisterThumbnailHandlers(grpcServer, l, thumbnailService)
 

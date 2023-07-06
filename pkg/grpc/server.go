@@ -1,10 +1,13 @@
 package grpc
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	"golang.org/x/exp/slog"
 	"google.golang.org/grpc"
 )
 
@@ -19,9 +22,17 @@ type Server struct {
 }
 
 // NewServer creates a gRPC server wrapper.
-func NewServer() *Server {
+func NewServer(l *slog.Logger) *Server {
 	server := &Server{
-		grpcServer: grpc.NewServer(),
+		grpcServer: grpc.NewServer(
+			grpc.ChainUnaryInterceptor(
+				recoveryUnaryServerInterceptor(l),
+				logging.UnaryServerInterceptor(
+					interceptorLogger(l),
+					logging.WithLogOnEvents(logging.StartCall, logging.FinishCall),
+				),
+			),
+		),
 	}
 
 	return server
@@ -54,6 +65,13 @@ func (s *Server) Notify() <-chan error {
 // Stop shut down a gRPC server gracefully.
 func (s *Server) Stop() {
 	s.grpcServer.GracefulStop()
+}
+
+// interceptorLogger adapts slog logger to interceptor logger.
+func interceptorLogger(l *slog.Logger) logging.Logger {
+	return logging.LoggerFunc(func(ctx context.Context, lvl logging.Level, msg string, fields ...any) {
+		l.Log(ctx, slog.Level(lvl), msg, fields...)
+	})
 }
 
 // addr returns a :port gRPC server address.
