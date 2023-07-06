@@ -1,3 +1,5 @@
+env: "local"
+
 redis:
   db: 1
   dial_timeout: 10s

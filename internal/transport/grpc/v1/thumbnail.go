@@ -3,11 +3,12 @@ package v1
 import (
 	"context"
 	"errors"
-	"log"
 
 	thumbnailpb "github.com/s02190058/reverse-proxy-cache/gen/go/thumbnail/v1"
 	"github.com/s02190058/reverse-proxy-cache/internal/service"
 	grpcserver "github.com/s02190058/reverse-proxy-cache/pkg/grpc"
+	"github.com/s02190058/reverse-proxy-cache/pkg/logger"
+	"golang.org/x/exp/slog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -22,13 +23,19 @@ type ThumbnailService interface {
 type ThumbnailHandler struct {
 	thumbnailpb.UnimplementedThumbnailServiceServer
 
+	l       *slog.Logger
 	service ThumbnailService
 }
 
 // RegisterThumbnailHandlers adds thumbnail handlers to the gRPC server.
-func RegisterThumbnailHandlers(server *grpcserver.Server, service ThumbnailService) {
+func RegisterThumbnailHandlers(
+	server *grpcserver.Server,
+	l *slog.Logger,
+	service ThumbnailService,
+) {
 	server.RegisterHandlers(func(s *grpc.Server) {
 		thumbnailpb.RegisterThumbnailServiceServer(s, &ThumbnailHandler{
+			l:       l,
 			service: service,
 		})
 	})
@@ -41,13 +48,14 @@ func (h *ThumbnailHandler) Download(
 ) (*thumbnailpb.DownloadThumbnailResponse, error) {
 	image, err := h.service.Download(ctx, req.VideoID, req.Type.String())
 	if err != nil {
-		log.Print(err)
+		h.l.Error("ThumbnailService.Download", logger.Err(err))
 		switch {
+		// image wasn't cache, but response is valid
 		case errors.Is(err, service.ErrBadCache):
-			// TODO: log error
 			break
+		default:
+			return nil, status.Errorf(codes.Internal, "internal server error")
 		}
-		return nil, status.Errorf(codes.Internal, "internal server error")
 	}
 
 	return &thumbnailpb.DownloadThumbnailResponse{

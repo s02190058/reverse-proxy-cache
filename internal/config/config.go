@@ -8,6 +8,7 @@ import (
 
 type (
 	Config struct {
+		Env     string  `env-required:"true" yaml:"env" env:"ENV"`
 		GRPC    GRPC    `yaml:"grpc" env-prefix:"GRPC_"`
 		Redis   Redis   `yaml:"redis" env-prefix:"REDIS_"`
 		Youtube Youtube `yaml:"youtube" env-prefix:"YOUTUBE_"`
