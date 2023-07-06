@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	ErrInternal  = errors.New("redis cache internal error")
 	ErrCacheMiss = errors.New("cache miss")
+	ErrInternal  = errors.New("redis cache internal error")
 )
 
 // ThumbnailCache is a Redis cache for thumbnails.
