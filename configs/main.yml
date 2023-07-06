@@ -1,0 +1,10 @@
+redis:
+  db: 1
+  dial_timeout: 10s
+  conn_timeout: 5s
+  ttl: 15m
+
+youtube:
+  scheme: "http"
+  host: "i3.ytimg.com"
+  timeout: 5s

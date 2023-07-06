@@ -27,6 +27,11 @@ func NewServer() *Server {
 	return server
 }
 
+// RegisterHandlers allows to add handlers to the gRPC server that is encapsulated.
+func (s *Server) RegisterHandlers(register func(s *grpc.Server)) {
+	register(s.grpcServer)
+}
+
 // Start launches a gRPC server in a separate goroutine.
 func (s *Server) Start(port string) error {
 	lis, err := net.Listen("tcp", addr(port))

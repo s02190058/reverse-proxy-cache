@@ -1,2 +1,8 @@
 # IDE
 .idea/
+
+# sensitive data
+.env
+
+# Redis data
+redis-data/

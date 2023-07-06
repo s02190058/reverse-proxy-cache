@@ -3,9 +3,11 @@ package v1
 import (
 	"context"
 	"errors"
+	"log"
 
 	thumbnailpb "github.com/s02190058/reverse-proxy-cache/gen/go/thumbnail/v1"
 	"github.com/s02190058/reverse-proxy-cache/internal/service"
+	grpcserver "github.com/s02190058/reverse-proxy-cache/pkg/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -24,9 +26,11 @@ type ThumbnailHandler struct {
 }
 
 // RegisterThumbnailHandlers adds thumbnail handlers to the gRPC server.
-func RegisterThumbnailHandlers(server *grpc.Server, service ThumbnailService) {
-	thumbnailpb.RegisterThumbnailServiceServer(server, &ThumbnailHandler{
-		service: service,
+func RegisterThumbnailHandlers(server *grpcserver.Server, service ThumbnailService) {
+	server.RegisterHandlers(func(s *grpc.Server) {
+		thumbnailpb.RegisterThumbnailServiceServer(s, &ThumbnailHandler{
+			service: service,
+		})
 	})
 }
 
@@ -37,6 +41,7 @@ func (h *ThumbnailHandler) Download(
 ) (*thumbnailpb.DownloadThumbnailResponse, error) {
 	image, err := h.service.Download(ctx, req.VideoID, req.Type.String())
 	if err != nil {
+		log.Print(err)
 		switch {
 		case errors.Is(err, service.ErrBadCache):
 			// TODO: log error
